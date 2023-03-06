@@ -6,6 +6,11 @@ import { UserModule } from './user/user.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { UserEntity } from './user/user.entity'
+import { CategoryEneity } from './category/cateogory.entity'
+import { LinkEntity } from './link/link.eneity'
+import { MessageEntity } from './message/message.entity'
+import { AuthModule } from './auth/auth.module'
+import { MessageModule } from './message/message.module'
 
 @Module({
   imports: [
@@ -19,10 +24,12 @@ import { UserEntity } from './user/user.entity'
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [UserEntity],
+      entities: [UserEntity, LinkEntity, CategoryEneity, MessageEntity],
       synchronize: true
     }),
-    UserModule
+    UserModule,
+    AuthModule,
+    MessageModule
   ],
   controllers: [AppController],
   providers: [AppService]
