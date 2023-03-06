@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common'
-
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import { UserModule } from './user/user.module'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { UserEntity } from './user/user.entity'
+
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATABASE_HOST,
@@ -15,9 +19,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [],
+      entities: [UserEntity],
       synchronize: true
-    })
+    }),
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService]
