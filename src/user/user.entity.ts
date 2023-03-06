@@ -1,9 +1,9 @@
 import { Column, DeleteDateColumn, Entity } from 'typeorm'
-
-import { CommonEntity } from 'src/common/common.entity'
 import { IsEmail, IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
-enum RoleType {
+import { CommonEntity } from 'src/common/common.entity'
+
+export enum RoleType {
   'amdin' = 'amdin',
   'tenqube' = 'tenqube'
 }
@@ -17,7 +17,7 @@ export class UserEntity extends CommonEntity {
 
   @IsString()
   @IsNotEmpty()
-  @Column({ type: 'varchar', length: 50, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   password: string
 
   @DeleteDateColumn({ name: 'delete_at', nullable: true, default: null })
