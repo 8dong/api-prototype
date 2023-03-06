@@ -7,4 +7,10 @@ import { UserEntity } from './user.entity'
 @Injectable()
 export class UserRepository {
   constructor(@InjectRepository(UserEntity) private readonly userEntity: Repository<UserEntity>) {}
+
+  async findUserByEamil(email: string) {
+    const userData = await this.userEntity.findOneBy({ email })
+
+    return userData
+  }
 }
