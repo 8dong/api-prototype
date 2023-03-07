@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import * as bycrypt from 'bcrypt'
+// import * as bycrypt from 'bcrypt'
 
 import { UserEntity } from './user.entity'
 
@@ -21,9 +21,9 @@ export class UserRepository {
     return userData
   }
 
-  async createUser(email, password, role) {
-    const hashedpassword = await bycrypt.hash(password, 10)
+  // async createUser(email, password, role) {
+  //   const hashedpassword = await bycrypt.hash(password, 10)
 
-    await this.userEntity.save({ email, password: hashedpassword, role })
-  }
+  //   await this.userEntity.save({ email, password: hashedpassword, role })
+  // }
 }

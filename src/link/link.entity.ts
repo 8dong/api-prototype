@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
 import { CommonEntity } from 'src/common/common.entity'
 
-enum LinkType {
+export enum LinkType {
   'external' = 'external',
   'deeplink' = 'deeplink'
 }

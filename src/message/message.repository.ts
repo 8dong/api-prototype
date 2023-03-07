@@ -10,12 +10,24 @@ export class MessageRepository {
     @InjectRepository(MessageEntity) private readonly messageEntity: Repository<MessageEntity>
   ) {}
 
-  async findMessageByUserId(userId: number) {
-    const message = await this.messageEntity
+  async findMessagesByUserId(userId: number) {
+    const messages = await this.messageEntity
       .createQueryBuilder('message')
-      .where('message.user_id = :user_id', { user_id: userId })
-      .getMany()
+      .innerJoinAndSelect('message.link', 'link')
+      .leftJoinAndSelect('message.category', 'category')
+      .where('message.user = :user', { user: userId })
+      .select([
+        'message.content',
+        'message.visibleToAt',
+        'message.visibleFromAt',
+        'message.constantlyVisible',
+        'message.createAt',
+        'link.href',
+        'link.type',
+        'category.id'
+      ])
+      .getRawMany()
 
-    return message
+    return messages
   }
 }

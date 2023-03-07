@@ -1,8 +1,17 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator'
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne
+} from 'typeorm'
 
 import { CommonEntity } from 'src/common/common.entity'
-import { LinkEntity } from './../link/link.eneity'
+import { LinkEntity } from 'src/link/link.entity'
 import { CategoryEneity } from './../category/cateogory.entity'
 import { UserEntity } from 'src/user/user.entity'
 
@@ -25,15 +34,18 @@ export class MessageEntity extends CommonEntity {
   @Column({ name: 'constantly_visible', type: 'boolean', nullable: false })
   constantlyVisible: boolean
 
+  @CreateDateColumn({ name: 'created_at' })
+  createAt: Date
+
   @OneToOne(() => LinkEntity, (linkEntity) => linkEntity.id)
   @JoinColumn({ name: 'link_id' })
-  linkId: number
+  link: LinkEntity
 
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.id)
   @JoinColumn({ name: 'user_id' })
-  userId: number
+  user: UserEntity
 
   @ManyToMany(() => CategoryEneity)
   @JoinTable({ name: 'category_message' })
-  categoryId: number
+  category: CategoryEneity
 }
