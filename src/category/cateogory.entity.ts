@@ -1,7 +1,7 @@
 import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, OneToOne } from 'typeorm'
 import { IsNotEmpty, IsString } from 'class-validator'
 
-import { CommonEntity } from 'src/common/common.entity'
+import { CommonEntity } from 'src/common/entities/common.entity'
 import { MessageEntity } from 'src/message/message.entity'
 
 @Entity('category')

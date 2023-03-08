@@ -1,7 +1,7 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator'
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm'
 
-import { CommonEntity } from 'src/common/common.entity'
+import { CommonEntity } from 'src/common/entities/common.entity'
 import { LinkEntity } from 'src/link/link.entity'
 import { CategoryEntity } from './../category/cateogory.entity'
 import { UserEntity } from 'src/user/user.entity'

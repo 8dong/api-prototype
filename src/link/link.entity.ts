@@ -2,7 +2,7 @@ import { MessageEntity } from './../message/message.entity'
 import { Entity, Column, OneToOne } from 'typeorm'
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
-import { CommonEntity } from 'src/common/common.entity'
+import { CommonEntity } from 'src/common/entities/common.entity'
 
 export enum LinkType {
   'external' = 'external',
