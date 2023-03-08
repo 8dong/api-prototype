@@ -3,9 +3,9 @@ import { Module, forwardRef } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { AuthModule } from './../auth/auth.module'
-import { UserRepository } from './user.repository'
-import { UserEntity } from './user.entity'
 import { MessageModule } from 'src/message/message.module'
+import { UserEntity } from './user.entity'
+import { UserRepository } from './user.repository'
 
 @Module({
   imports: [

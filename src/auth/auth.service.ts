@@ -17,19 +17,16 @@ export class AuthService {
     const { email, password } = loginReqeust
 
     const userData = await this.userRepository.findUserByEamil(email)
-
     if (!userData) {
       throw new UnauthorizedException('Check your email or password')
     }
 
     const isPasswordValid = await bcrypt.compare(password, userData.password)
-
     if (!isPasswordValid) {
       throw new UnauthorizedException('Check your email or password')
     }
 
-    const jwtPayload: JwtPaylodDto = { email, sub: userData.uuid }
-
+    const jwtPayload: JwtPaylodDto = { email, role: userData.role, sub: userData.uuid }
     const access_token = this.jwtService.sign(jwtPayload)
 
     return access_token

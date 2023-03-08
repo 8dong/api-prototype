@@ -3,9 +3,9 @@ import { Body, Controller, Post, Get, Req, UseGuards, BadRequestException } from
 // import { UserRepository } from './user.repository'
 import { CreateRequestDto } from './dto/createMessage.request.dto'
 import { LoginRequestDto } from './../auth/dto/login.request.dto'
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard'
 import { AuthService } from 'src/auth/auth.service'
 import { MessageService } from 'src/message/message.service'
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard'
 
 @Controller('user')
 export class UserController {

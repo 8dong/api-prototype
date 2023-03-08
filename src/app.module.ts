@@ -4,8 +4,6 @@ import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { UserModule } from './user/user.module'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { UserEntity } from './user/user.entity'
 import { CategoryEneity } from './category/cateogory.entity'
 import { LinkEntity } from './link/link.entity'
@@ -33,7 +31,7 @@ import { MessageModule } from './message/message.module'
     MessageModule,
     CategoryModule
   ],
-  controllers: [AppController],
-  providers: [AppService]
+  controllers: [],
+  providers: []
 })
 export class AppModule {}
