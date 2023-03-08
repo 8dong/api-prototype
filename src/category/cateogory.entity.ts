@@ -1,7 +1,8 @@
-import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn } from 'typeorm'
+import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, OneToOne } from 'typeorm'
 import { IsNotEmpty, IsString } from 'class-validator'
 
 import { CommonEntity } from 'src/common/common.entity'
+import { MessageEntity } from 'src/message/message.entity'
 
 @Entity('category')
 @Tree('closure-table', {
@@ -20,4 +21,7 @@ export class CategoryEneity extends CommonEntity {
   @TreeParent()
   @JoinColumn({ name: 'parent_id' })
   parent: CategoryEneity
+
+  @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.category)
+  message: MessageEntity
 }

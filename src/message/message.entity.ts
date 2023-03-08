@@ -1,14 +1,5 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator'
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToOne
-} from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm'
 
 import { CommonEntity } from 'src/common/common.entity'
 import { LinkEntity } from 'src/link/link.entity'
@@ -37,15 +28,15 @@ export class MessageEntity extends CommonEntity {
   @CreateDateColumn({ name: 'created_at' })
   createAt: Date
 
-  @OneToOne(() => LinkEntity, (linkEntity) => linkEntity.id)
+  @OneToOne(() => LinkEntity, (linkEntity) => linkEntity.message, { cascade: true })
   @JoinColumn({ name: 'link_id' })
   link: LinkEntity
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.id)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.message, { cascade: true })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity
 
-  @ManyToMany(() => CategoryEneity)
-  @JoinTable({ name: 'category_message' })
+  @OneToOne(() => CategoryEneity, (categoryEntity) => categoryEntity.message, { cascade: true })
+  @JoinColumn({ name: 'category_id' })
   category: CategoryEneity
 }

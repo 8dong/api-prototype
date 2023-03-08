@@ -1,7 +1,8 @@
-import { Column, DeleteDateColumn, Entity } from 'typeorm'
+import { Column, DeleteDateColumn, Entity, OneToMany } from 'typeorm'
 import { IsEmail, IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
 import { CommonEntity } from 'src/common/common.entity'
+import { MessageEntity } from 'src/message/message.entity'
 
 export enum RoleType {
   'amdin' = 'amdin',
@@ -27,4 +28,7 @@ export class UserEntity extends CommonEntity {
   @IsNotEmpty()
   @Column({ type: 'enum', enum: RoleType, nullable: false })
   role: RoleType
+
+  @OneToMany(() => MessageEntity, (messageEntity) => messageEntity.user)
+  message: MessageEntity[]
 }

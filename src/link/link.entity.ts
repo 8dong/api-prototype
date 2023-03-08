@@ -1,4 +1,5 @@
-import { Entity, Column } from 'typeorm'
+import { MessageEntity } from './../message/message.entity'
+import { Entity, Column, OneToOne } from 'typeorm'
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator'
 
 import { CommonEntity } from 'src/common/common.entity'
@@ -19,4 +20,7 @@ export class LinkEntity extends CommonEntity {
   @IsNotEmpty()
   @Column({ type: 'enum', enum: LinkType, nullable: false })
   type: LinkType
+
+  @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.link)
+  message: MessageEntity
 }
