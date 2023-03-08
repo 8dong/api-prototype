@@ -2,9 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 
-import { UserRepository } from './../user/user.repository'
 import { LoginRequestDto } from './dto/login.request.dto'
 import { JwtPaylodDto } from './dto/jwtPayload.dto'
+import { UserRepository } from './../user/user.repository'
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
   async jwtLogin(loginReqeust: LoginRequestDto) {
     const { email, password } = loginReqeust
 
-    const userData = await this.userRepository.findUserByEamil(email)
+    const userData = await this.userRepository.findOneByUserEamil(email)
     if (!userData) {
       throw new UnauthorizedException('Check your email or password')
     }

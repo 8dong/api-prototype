@@ -7,7 +7,7 @@ export class LinkService {
   constructor(private readonly linkRepository: LinkRepository) {}
 
   async getLink(uuid: string) {
-    const linkData = await this.linkRepository.findLinkByUUID(uuid)
+    const linkData = await this.linkRepository.findOneByUUID(uuid)
 
     return linkData
   }

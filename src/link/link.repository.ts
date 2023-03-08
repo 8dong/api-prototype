@@ -10,20 +10,24 @@ import { LinkEntity } from './link.entity'
 export class LinkRepository {
   constructor(@InjectRepository(LinkEntity) private readonly linkEntity: Repository<LinkEntity>) {}
 
-  async findLinkByUUID(uuid: string) {
+  async findOneByUUID(uuid: string) {
     const linkData = await this.linkEntity.findOneBy({ uuid })
 
     return linkData
   }
 
-  async createLink(href: string, type: LinkType) {
+  async create(href: string, type: LinkType) {
     const uuid = v4()
-    const newLink = await this.linkEntity.save({
-      uuid,
-      href,
-      type
-    })
+
+    const newLink = new LinkEntity()
+    newLink.uuid = uuid
+    newLink.href = href
+    newLink.type = type
 
     return newLink
+  }
+
+  async save(link: LinkEntity) {
+    await this.linkEntity.save(link)
   }
 }

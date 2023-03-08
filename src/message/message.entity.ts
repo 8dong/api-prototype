@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } fro
 
 import { CommonEntity } from 'src/common/common.entity'
 import { LinkEntity } from 'src/link/link.entity'
-import { CategoryEneity } from './../category/cateogory.entity'
+import { CategoryEntity } from './../category/cateogory.entity'
 import { UserEntity } from 'src/user/user.entity'
 
 @Entity('message')
@@ -36,7 +36,7 @@ export class MessageEntity extends CommonEntity {
   @JoinColumn({ name: 'user_id' })
   user: UserEntity
 
-  @OneToOne(() => CategoryEneity, (categoryEntity) => categoryEntity.message, { cascade: true })
+  @OneToOne(() => CategoryEntity, (categoryEntity) => categoryEntity.message, { cascade: true })
   @JoinColumn({ name: 'category_id' })
-  category: CategoryEneity
+  category: CategoryEntity
 }

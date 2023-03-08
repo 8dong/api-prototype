@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { CategoryEneity } from './cateogory.entity'
+import { CategoryEntity } from './cateogory.entity'
 import { CategoryRepository } from './category.repository'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEneity])],
+  imports: [TypeOrmModule.forFeature([CategoryEntity])],
   controllers: [],
   providers: [CategoryRepository],
   exports: [CategoryRepository]

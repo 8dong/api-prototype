@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import v4 from 'uuid'
 
-import { CategoryEneity } from './cateogory.entity'
+import { CategoryEntity } from './cateogory.entity'
 import { TreeRepository } from 'typeorm'
 
 @Injectable()
 export class CategoryRepository {
   constructor(
-    @InjectRepository(CategoryEneity)
-    private readonly categoryEntity: TreeRepository<CategoryEneity>
+    @InjectRepository(CategoryEntity)
+    private readonly categoryEntity: TreeRepository<CategoryEntity>
   ) {}
 
   async findAllAncestorsByCategoryId(categoryId: number) {
     let currentCategory = await this.categoryEntity.findOneBy({ id: categoryId })
     let currentAncestorNum = await this.categoryEntity.countAncestors(currentCategory)
 
-    const result: CategoryEneity[] = []
+    const result: CategoryEntity[] = []
     result.unshift(currentCategory)
 
     while (currentAncestorNum !== 0) {
@@ -41,7 +40,7 @@ export class CategoryRepository {
     return largeCaegory
   }
 
-  async findMediumCategoryByContent(largeCategory: CategoryEneity, content: string) {
+  async findMediumCategoryByContent(largeCategory: CategoryEntity, content: string) {
     const mediumCategory = (await this.categoryEntity.findDescendants(largeCategory)).find(
       (category) => category.content === content
     )
@@ -49,7 +48,7 @@ export class CategoryRepository {
     return mediumCategory
   }
 
-  async findSmallCategoryByContent(mediumCategory: CategoryEneity, content: string) {
+  async findSmallCategoryByContent(mediumCategory: CategoryEntity, content: string) {
     const smallCategory = (await this.categoryEntity.findDescendants(mediumCategory)).find(
       (category) => category.content === content
     )

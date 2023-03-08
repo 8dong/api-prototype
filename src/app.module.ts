@@ -1,16 +1,15 @@
-import { CategoryModule } from './category/category.module'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { UserModule } from './user/user.module'
-import { UserEntity } from './user/user.entity'
-import { CategoryEneity } from './category/cateogory.entity'
+import { MessageModule } from './message/message.module'
+import { AuthModule } from './auth/auth.module'
+import { CategoryModule } from './category/category.module'
 import { LinkEntity } from './link/link.entity'
 import { MessageEntity } from './message/message.entity'
-import { AuthModule } from './auth/auth.module'
-import { MessageModule } from './message/message.module'
-
+import { CategoryEntity } from './category/cateogory.entity'
+import { UserEntity } from './user/user.entity'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +22,7 @@ import { MessageModule } from './message/message.module'
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [UserEntity, LinkEntity, CategoryEneity, MessageEntity],
+      entities: [UserEntity, LinkEntity, CategoryEntity, MessageEntity],
       synchronize: true
     }),
     UserModule,

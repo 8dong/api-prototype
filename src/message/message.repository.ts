@@ -4,24 +4,32 @@ import { Repository } from 'typeorm'
 import { v4 } from 'uuid'
 
 import { MessageEntity } from './message.entity'
-import { UserRepository } from 'src/user/user.repository'
 import { UserEntity } from 'src/user/user.entity'
 import { LinkEntity } from 'src/link/link.entity'
-import { CategoryEneity } from './../category/cateogory.entity'
+import { CategoryEntity } from './../category/cateogory.entity'
+
+interface MessageConfigProps {
+  content: string
+  visibleToAt: Date
+  visibleFromAt: Date
+  constantlyVisible: boolean
+  category: CategoryEntity
+  link: LinkEntity
+  user: UserEntity
+}
 
 @Injectable()
 export class MessageRepository {
   constructor(
-    @InjectRepository(MessageEntity) private readonly messageEntity: Repository<MessageEntity>,
-    private readonly userRepository: UserRepository
+    @InjectRepository(MessageEntity) private readonly messageEntity: Repository<MessageEntity>
   ) {}
 
-  async findMessagesByUserId(userId: number) {
+  async findAllByUserId(id: number) {
     const messages = await this.messageEntity
       .createQueryBuilder('message')
       .innerJoinAndSelect('message.link', 'link')
       .leftJoinAndSelect('message.category', 'category')
-      .where('message.user = :user', { user: userId })
+      .where('message.user = :id', { id })
       .select([
         'message.content',
         'message.visibleToAt',
@@ -37,27 +45,23 @@ export class MessageRepository {
     return messages
   }
 
-  async creaetMessage(
-    content: string,
-    visibleToAt: Date,
-    visibleFromAt: Date,
-    constantlyVisible: boolean,
-    cateogry: CategoryEneity,
-    link: LinkEntity,
-    user: UserEntity
-  ) {
+  create(config: MessageConfigProps) {
     const uuid = v4()
 
-    const message = new MessageEntity()
-    message.uuid = uuid
-    message.content = content
-    message.visibleToAt = visibleToAt
-    message.visibleFromAt = visibleFromAt
-    message.constantlyVisible = constantlyVisible
-    message.category = cateogry
-    message.link = link
-    message.user = user
+    const newMessage = new MessageEntity()
+    newMessage.uuid = uuid
+    newMessage.content = config.content
+    newMessage.visibleToAt = config.visibleToAt
+    newMessage.visibleFromAt = config.visibleFromAt
+    newMessage.constantlyVisible = config.constantlyVisible
+    newMessage.category = config.category
+    newMessage.link = config.link
+    newMessage.user = config.user
 
-    return await this.messageEntity.save(message)
+    return newMessage
+  }
+
+  async save(message: MessageEntity) {
+    await this.messageEntity.save(message)
   }
 }

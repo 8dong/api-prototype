@@ -9,18 +9,18 @@ import { MessageEntity } from 'src/message/message.entity'
   ancestorColumnName: () => 'ancestor_id',
   descendantColumnName: () => 'descendant_id'
 })
-export class CategoryEneity extends CommonEntity {
+export class CategoryEntity extends CommonEntity {
   @IsString()
   @IsNotEmpty()
   @Column({ type: 'varchar', length: 255, nullable: false })
   content: string
 
   @TreeChildren()
-  children: CategoryEneity[]
+  children: CategoryEntity[]
 
   @TreeParent()
   @JoinColumn({ name: 'parent_id' })
-  parent: CategoryEneity
+  parent: CategoryEntity
 
   @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.category)
   message: MessageEntity

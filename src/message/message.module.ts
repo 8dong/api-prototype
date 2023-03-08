@@ -1,22 +1,17 @@
 import { LinkModule } from 'src/link/link.module'
-import { Module, forwardRef } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import { CategoryModule } from 'src/category/category.module'
+import { UserModule } from 'src/user/user.module'
 import { MessageEntity } from './message.entity'
+import { MessageContoller } from './message.controller'
 import { MessageService } from './message.service'
 import { MessageRepository } from './message.repository'
-import { UserModule } from 'src/user/user.module'
-import { CategoryModule } from 'src/category/category.module'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MessageEntity]),
-    forwardRef(() => UserModule),
-    CategoryModule,
-    LinkModule,
-    forwardRef(() => UserModule)
-  ],
-  controllers: [],
+  imports: [TypeOrmModule.forFeature([MessageEntity]), UserModule, CategoryModule, LinkModule],
+  controllers: [MessageContoller],
   providers: [MessageService, MessageRepository],
   exports: [MessageService, MessageRepository]
 })

@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPaylodDto) {
     const { email } = payload
 
-    const userData = await this.userRepository.findUserByEamil(email)
+    const userData = await this.userRepository.findOneByUserEamil(email)
 
     if (!userData) {
       throw new UnauthorizedException('Invalid User credentials')

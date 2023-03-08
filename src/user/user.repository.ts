@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-// import * as bycrypt from 'bcrypt'
+import * as bycrypt from 'bcrypt'
 
 import { UserEntity } from './user.entity'
 
@@ -9,21 +9,21 @@ import { UserEntity } from './user.entity'
 export class UserRepository {
   constructor(@InjectRepository(UserEntity) private readonly userEntity: Repository<UserEntity>) {}
 
-  async findUserByUUID(uuid: string) {
-    const userData = await this.userEntity.findOneBy({ uuid })
+  async findOneByUserUniqueId(id: string) {
+    const user = await this.userEntity.findOneBy({ uuid: id })
 
-    return userData
+    return user
   }
 
-  async findUserByEamil(email: string) {
+  async findOneByUserEamil(email: string) {
     const userData = await this.userEntity.findOneBy({ email })
 
     return userData
   }
 
-  // async createUser(email, password, role) {
-  //   const hashedpassword = await bycrypt.hash(password, 10)
+  async saveUser(email, password, role) {
+    const hashedpassword = await bycrypt.hash(password, 10)
 
-  //   await this.userEntity.save({ email, password: hashedpassword, role })
-  // }
+    await this.userEntity.save({ email, password: hashedpassword, role })
+  }
 }

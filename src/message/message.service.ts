@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { CreateRequestDto } from './../user/dto/createMessage.request.dto'
 import { UserRepository } from 'src/user/user.repository'
@@ -9,15 +9,15 @@ import { LinkRepository } from 'src/link/link.repository'
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly userRepository: UserRepository,
     private readonly messageRepository: MessageRepository,
+    private readonly userRepository: UserRepository,
     private readonly categoryRepository: CategoryRepository,
     private readonly linkRepository: LinkRepository
   ) {}
 
-  async getMessages(uuid: string) {
-    const { id: userId } = await this.userRepository.findUserByUUID(uuid)
-    const messages = await this.messageRepository.findMessagesByUserId(userId)
+  async getMessagesByUserUniqueId(id: string) {
+    const { id: userId } = await this.userRepository.findOneByUserUniqueId(id)
+    const messages = await this.messageRepository.findAllByUserId(userId)
 
     for (const message of messages) {
       const ancestorCategoryList = await this.categoryRepository.findAllAncestorsByCategoryId(
@@ -32,35 +32,40 @@ export class MessageService {
     return messages
   }
 
-  async createMessage(userUUID: string, messageConfig: CreateRequestDto) {
-    const newLink = await this.linkRepository.createLink(
-      messageConfig.linkHref,
-      messageConfig.linkType
-    )
+  async createMessage(id: string, req: CreateRequestDto) {
+    const newLink = await this.linkRepository.create(req.linkHref, req.linkType)
 
-    const user = await this.userRepository.findUserByUUID(userUUID)
+    const user = await this.userRepository.findOneByUserUniqueId(id)
 
     const largeCategory = await this.categoryRepository.findLargeCategoryByContent(
-      messageConfig.categoryContent.largeCategory
+      req.categoryContent.largeCategory
     )
     const mediumCategory = await this.categoryRepository.findMediumCategoryByContent(
       largeCategory,
-      messageConfig.categoryContent.mediumCategory
+      req.categoryContent.mediumCategory
     )
     const smallCategory = await this.categoryRepository.findSmallCategoryByContent(
       mediumCategory,
-      messageConfig.categoryContent.smallCategory
+      req.categoryContent.smallCategory
     )
 
-    const newMessage = await this.messageRepository.creaetMessage(
-      messageConfig.content,
-      messageConfig.visibleToAt,
-      messageConfig.visibleFromAt,
-      messageConfig.constantlyVisible,
-      smallCategory,
-      newLink,
-      user
-    )
+    if (!smallCategory) {
+      throw new BadRequestException('Check your request')
+    }
+
+    const messageConfig = {
+      content: req.content,
+      visibleToAt: req.visibleToAt,
+      visibleFromAt: req.visibleFromAt,
+      constantlyVisible: req.constantlyVisible,
+      category: smallCategory,
+      link: newLink,
+      user: user
+    }
+
+    const newMessage = this.messageRepository.create(messageConfig)
+    await this.linkRepository.save(newLink)
+    await this.messageRepository.save(newMessage)
 
     return newMessage
   }
