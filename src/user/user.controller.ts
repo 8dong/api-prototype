@@ -13,7 +13,7 @@ export class UserController {
 
   @Post('/login')
   async login(@Body() body: LoginRequestDto) {
-    const access_token = await this.authService.jwtLogin(body)
+    const access_token = await this.authService.jwtLogin(body.email, body.password)
 
     return {
       access_token

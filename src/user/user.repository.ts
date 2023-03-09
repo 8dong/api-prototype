@@ -10,15 +10,15 @@ export class UserRepository {
   constructor(@InjectRepository(UserEntity) private readonly userEntity: Repository<UserEntity>) {}
 
   async findOneByUserUniqueId(uuid: string) {
-    const user = await this.userEntity.findOneBy({ uuid })
+    const userEntity = await this.userEntity.findOneBy({ uuid })
 
-    return user
+    return userEntity
   }
 
   async findOneByUserEamil(email: string) {
-    const userData = await this.userEntity.findOneBy({ email })
+    const userEntity = await this.userEntity.findOneBy({ email })
 
-    return userData
+    return userEntity
   }
 
   async saveUser(email, password, role) {

@@ -16,18 +16,27 @@ export class LinkRepository {
     return linkData
   }
 
-  async create(href: string, type: LinkType) {
+  createLinkEntity(href: string, type: LinkType) {
     const uuid = v4()
 
-    const newLink = new LinkEntity()
-    newLink.uuid = uuid
-    newLink.href = href
-    newLink.type = type
+    const newLinkEntity = new LinkEntity()
+    newLinkEntity.uuid = uuid
+    newLinkEntity.href = href
+    newLinkEntity.type = type
 
-    return newLink
+    return newLinkEntity
   }
 
-  async save(link: LinkEntity) {
+  async saveLinkEntity(link: LinkEntity) {
     await this.linkEntity.save(link)
+  }
+
+  async updateLinkEntity(linkConfig) {
+    await this.linkEntity
+      .createQueryBuilder('link')
+      .where('link.uuid = :uuid', { uuid: linkConfig.uuid })
+      .update()
+      .set({ ...linkConfig })
+      .execute()
   }
 }

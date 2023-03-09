@@ -1,6 +1,8 @@
+import { CategoryEntity } from './../category/category.entity'
 import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { CreateRequestDto } from './../user/dto/createMessage.request.dto'
+import { UpdateRequestDto } from './dto/update.request.dto'
 import { UserRepository } from 'src/user/user.repository'
 import { CategoryRepository } from 'src/category/category.repository'
 import { MessageRepository } from './message.repository'
@@ -16,45 +18,42 @@ export class MessageService {
   ) {}
 
   async getMessagesByUserUniqueId(uuid: string) {
-    const { id: userId } = await this.userRepository.findOneByUserUniqueId(uuid)
-    const messages = await this.messageRepository.findAllByUserId(userId)
+    const userEntity = await this.userRepository.findOneByUserUniqueId(uuid)
+    const messageRawList = await this.messageRepository.getRawManyByUserId(userEntity.id)
 
-    for (const message of messages) {
-      const categoryList = await this.categoryRepository.findAllCategoryByMessageId(
-        message.message_id
-      )
+    for (const messageRaw of messageRawList) {
+      const categoryEntityList = await this.categoryRepository.getManyByMessageId(messageRaw.id)
 
-      const categoryContentList = categoryList.map((category) => ({
-        categoryType: category.category_type,
-        categoryContent: category.category_content
+      const categoryContentList = categoryEntityList.map((categoryEntity) => ({
+        categoryType: categoryEntity.type,
+        categoryContent: categoryEntity.content
       }))
 
-      message.category = categoryContentList
+      messageRaw.category = categoryContentList
 
-      delete message.category_id
+      delete messageRaw.smallCategoryId
+      delete messageRaw.id
     }
 
-    return messages
+    return messageRawList
   }
 
-  async createMessage(id: string, req: CreateRequestDto) {
-    const newLink = await this.linkRepository.create(req.linkHref, req.linkType)
+  async createMessage(uuid: string, req: CreateRequestDto) {
+    const newLinkEntity = this.linkRepository.createLinkEntity(req.linkHref, req.linkType)
+    const userEntity = await this.userRepository.findOneByUserUniqueId(uuid)
 
-    const user = await this.userRepository.findOneByUserUniqueId(id)
-
-    const largeCategory = await this.categoryRepository.findLargeCategoryByContent(
+    const largeCategoryEntity = await this.categoryRepository.findOneLargeCategoryEntityByContent(
       req.categoryContent.largeCategory
     )
-    const mediumCategory = await this.categoryRepository.findMediumCategoryByContent(
-      largeCategory,
+    const mediumCategoryEntity = await this.categoryRepository.findOneMediumCategoryEntityByContent(
+      largeCategoryEntity,
       req.categoryContent.mediumCategory
     )
-    const smallCategory = await this.categoryRepository.findSmallCategoryByContent(
-      mediumCategory,
+    const smallCategoryEntity = await this.categoryRepository.findOneSmallCategoryEntityByContent(
+      mediumCategoryEntity,
       req.categoryContent.smallCategory
     )
-
-    if (!largeCategory || !mediumCategory || !smallCategory) {
+    if (!largeCategoryEntity || !mediumCategoryEntity || !smallCategoryEntity) {
       throw new BadRequestException('Check your request')
     }
 
@@ -63,16 +62,31 @@ export class MessageService {
       visibleToAt: req.visibleToAt,
       visibleFromAt: req.visibleFromAt,
       constantlyVisible: req.constantlyVisible,
-      categoryList: [largeCategory, mediumCategory, smallCategory],
-      link: newLink,
-      user: user
+      categoryList: [largeCategoryEntity, mediumCategoryEntity, smallCategoryEntity],
+      link: newLinkEntity,
+      user: userEntity
     }
+    const newMessage = this.messageRepository.createMessageEntity(messageConfig)
 
-    const newMessage = this.messageRepository.create(messageConfig)
-    await this.linkRepository.save(newLink)
-    await this.messageRepository.save(newMessage)
+    await this.linkRepository.saveLinkEntity(newLinkEntity)
+    await this.messageRepository.saveMessageEntity(newMessage)
 
     return newMessage
+  }
+
+  async updateMessageByUserUniqueId(uuid: string, req: UpdateRequestDto) {
+    const messageConfig = { ...req.messageConfig }
+    const linkConfig = { ...req.linkConfig }
+
+    const categoryEntityList = []
+
+    for (const categoryConfig of req.categoryConfigList) {
+      const categoryEntity = await this.categoryRepository.findOneByUniqueId(categoryConfig.uuid)
+      categoryEntityList.push(categoryEntity)
+    }
+
+    await this.messageRepository.updateMessageEntity(messageConfig, categoryEntityList)
+    await this.linkRepository.updateLinkEntity(linkConfig)
   }
 }
 

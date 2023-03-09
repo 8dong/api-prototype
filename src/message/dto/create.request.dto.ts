@@ -1,4 +1,3 @@
-import { CategoryEntity } from '../../category/category.entity'
 import { PickType } from '@nestjs/mapped-types'
 import { Type } from 'class-transformer'
 import { IsString, IsObject, IsNotEmpty, IsEnum, IsNotEmptyObject } from 'class-validator'

@@ -3,10 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { v4 } from 'uuid'
 
+import { RawMessage } from './type/rawMessage'
 import { MessageEntity } from './message.entity'
 import { UserEntity } from 'src/user/user.entity'
 import { LinkEntity } from 'src/link/link.entity'
 import { CategoryEntity } from '../category/category.entity'
+import { plainToInstance } from 'class-transformer'
 
 interface MessageConfigProps {
   content: string
@@ -24,30 +26,30 @@ export class MessageRepository {
     @InjectRepository(MessageEntity) private readonly messageEntity: Repository<MessageEntity>
   ) {}
 
-  async findAllByUserId(id: number) {
-    const messages = await this.messageEntity
+  async getRawManyByUserId(userId: number) {
+    const messageRawList = await this.messageEntity
       .createQueryBuilder('message')
-      .innerJoinAndSelect('message.link', 'link')
+      .leftJoinAndSelect('message.link', 'link')
       .leftJoinAndSelect('message.category', 'category')
-      .where('message.user = :id', { id })
-      .andWhere('category.type = :type', { type: 'small' })
+      .where('message.user = :userId', { userId })
+      .andWhere('category.type = "small"')
       .select([
-        'message.id',
-        'message.content',
-        'message.visibleToAt',
-        'message.visibleFromAt',
-        'message.constantlyVisible',
-        'message.createAt',
-        'link.href',
-        'link.type',
-        'category.id'
+        'message.id as id',
+        'message.content as content',
+        'message.visibleToAt as visibleToAt',
+        'message.visibleFromAt as visibleFromAt',
+        'message.constantlyVisible as constantantlyVisible',
+        'message.createAt as createAt',
+        'link.href as linkHref',
+        'link.type as linkType',
+        'category.id as smallCategoryId'
       ])
       .getRawMany()
 
-    return messages
+    return plainToInstance(RawMessage, messageRawList)
   }
 
-  create(config: MessageConfigProps) {
+  createMessageEntity(config: MessageConfigProps) {
     const uuid = v4()
 
     const newMessage = new MessageEntity()
@@ -63,7 +65,33 @@ export class MessageRepository {
     return newMessage
   }
 
-  async save(message: MessageEntity) {
+  async saveMessageEntity(message: MessageEntity) {
     await this.messageEntity.save(message)
+  }
+
+  async updateMessageEntity(messageConfig, categoryEntityList) {
+    // console.log(messageConfig)
+    // console.log(categoryEntityList)
+
+    const message = await this.messageEntity
+      .createQueryBuilder('message')
+      .where('message.uuid = :uuid', { uuid: messageConfig.uuid })
+      .update()
+      .set({
+        ...messageConfig
+      })
+      .insert()
+      .values({
+        category: () => categoryEntityList
+      })
+      .execute()
+
+    console.log(message)
+  }
+
+  async findOneByUniqueId(uuid: string) {
+    const message = await this.messageEntity.findOneBy({ uuid })
+
+    return message
   }
 }

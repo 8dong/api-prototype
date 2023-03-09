@@ -11,37 +11,43 @@ export class CategoryRepository {
     private readonly categoryEntity: TreeRepository<CategoryEntity>
   ) {}
 
-  async findLargeCategoryByContent(content: string) {
-    const largeCaegory = (await this.categoryEntity.findRoots()).find((category) => {
+  async findOneLargeCategoryEntityByContent(content: string) {
+    const largeCaegoryEntity = (await this.categoryEntity.findRoots()).find((category) => {
       return category.content === content
     })
 
-    return largeCaegory
+    return largeCaegoryEntity
   }
 
-  async findMediumCategoryByContent(largeCategory: CategoryEntity, content: string) {
-    const mediumCategory = (await this.categoryEntity.findDescendants(largeCategory)).find(
+  async findOneMediumCategoryEntityByContent(largeCategory: CategoryEntity, content: string) {
+    const mediumCategoryEntity = (await this.categoryEntity.findDescendants(largeCategory)).find(
       (category) => category.content === content
     )
 
-    return mediumCategory
+    return mediumCategoryEntity
   }
 
-  async findSmallCategoryByContent(mediumCategory: CategoryEntity, content: string) {
-    const smallCategory = (await this.categoryEntity.findDescendants(mediumCategory)).find(
+  async findOneSmallCategoryEntityByContent(mediumCategory: CategoryEntity, content: string) {
+    const smallCategoryEntity = (await this.categoryEntity.findDescendants(mediumCategory)).find(
       (category) => category.content === content
     )
 
-    return smallCategory
+    return smallCategoryEntity
   }
 
-  async findAllCategoryByMessageId(id: number) {
+  async findOneByUniqueId(uuid: string) {
+    const category = await this.categoryEntity.findOneBy({ uuid })
+
+    return category
+  }
+
+  async getManyByMessageId(id: number) {
     const categoryList = await this.categoryEntity
       .createQueryBuilder('category')
       .leftJoinAndSelect('category.message', 'message')
       .where('message.id = :id', { id })
       .select('category')
-      .getRawMany()
+      .getMany()
 
     return categoryList
   }
