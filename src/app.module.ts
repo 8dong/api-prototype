@@ -8,7 +8,7 @@ import { AuthModule } from './auth/auth.module'
 import { CategoryModule } from './category/category.module'
 import { LinkEntity } from './link/link.entity'
 import { MessageEntity } from './message/message.entity'
-import { CategoryEntity } from './category/cateogory.entity'
+import { CategoryEntity } from './category/category.entity'
 import { UserEntity } from './user/user.entity'
 @Module({
   imports: [

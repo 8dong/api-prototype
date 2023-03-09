@@ -15,16 +15,21 @@ export class MessageService {
     private readonly linkRepository: LinkRepository
   ) {}
 
-  async getMessagesByUserUniqueId(id: string) {
-    const { id: userId } = await this.userRepository.findOneByUserUniqueId(id)
+  async getMessagesByUserUniqueId(uuid: string) {
+    const { id: userId } = await this.userRepository.findOneByUserUniqueId(uuid)
     const messages = await this.messageRepository.findAllByUserId(userId)
 
     for (const message of messages) {
-      const ancestorCategoryList = await this.categoryRepository.findAllAncestorsByCategoryId(
-        message.category_id
+      const categoryList = await this.categoryRepository.findAllCategoryByMessageId(
+        message.message_id
       )
 
-      message.category_content = ancestorCategoryList.map((category) => category.content)
+      const categoryContentList = categoryList.map((category) => ({
+        categoryType: category.category_type,
+        categoryContent: category.category_content
+      }))
+
+      message.category = categoryContentList
 
       delete message.category_id
     }
@@ -49,7 +54,7 @@ export class MessageService {
       req.categoryContent.smallCategory
     )
 
-    if (!smallCategory) {
+    if (!largeCategory || !mediumCategory || !smallCategory) {
       throw new BadRequestException('Check your request')
     }
 
@@ -58,7 +63,7 @@ export class MessageService {
       visibleToAt: req.visibleToAt,
       visibleFromAt: req.visibleFromAt,
       constantlyVisible: req.constantlyVisible,
-      category: smallCategory,
+      categoryList: [largeCategory, mediumCategory, smallCategory],
       link: newLink,
       user: user
     }
@@ -71,6 +76,6 @@ export class MessageService {
   }
 }
 
-// insert into category (uuid, content, parent_id) values('1', '식사', null), ('2', '고기', 1), ('3', '삼겹', 2), ('4', '분식', 1), ('5', '만두', 4), ('6','떡볶이', 4), ('7', '교통/차량', null), ('8', '대리운전', 7), ('9', '일반', 7);
+// insert into category (uuid, content, parent_id, type) values('1', '식사', null, 'large'), ('2', '고기', 1, 'medium'), ('3', '삼겹', 2, 'small'), ('4', '분식', 1, 'medium'), ('5', '만두', 4, 'small'), ('6','떡볶이', 4, 'small'), ('7', '교통/차량', null, 'large'), ('8', '대리운전', 7, 'medium'), ('9', '일반', 7, 'small');
 
 // insert into category_closure (ancestor_id, descendant_id) values(1, 2), (2, 3), (1, 4), (4, 5), (4, 6), (7, 8), (7, 9);

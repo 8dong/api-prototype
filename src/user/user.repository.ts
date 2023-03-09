@@ -9,8 +9,8 @@ import { UserEntity } from './user.entity'
 export class UserRepository {
   constructor(@InjectRepository(UserEntity) private readonly userEntity: Repository<UserEntity>) {}
 
-  async findOneByUserUniqueId(id: string) {
-    const user = await this.userEntity.findOneBy({ uuid: id })
+  async findOneByUserUniqueId(uuid: string) {
+    const user = await this.userEntity.findOneBy({ uuid })
 
     return user
   }

@@ -6,14 +6,14 @@ import { v4 } from 'uuid'
 import { MessageEntity } from './message.entity'
 import { UserEntity } from 'src/user/user.entity'
 import { LinkEntity } from 'src/link/link.entity'
-import { CategoryEntity } from './../category/cateogory.entity'
+import { CategoryEntity } from '../category/category.entity'
 
 interface MessageConfigProps {
   content: string
   visibleToAt: Date
   visibleFromAt: Date
   constantlyVisible: boolean
-  category: CategoryEntity
+  categoryList: CategoryEntity[]
   link: LinkEntity
   user: UserEntity
 }
@@ -30,7 +30,9 @@ export class MessageRepository {
       .innerJoinAndSelect('message.link', 'link')
       .leftJoinAndSelect('message.category', 'category')
       .where('message.user = :id', { id })
+      .andWhere('category.type = :type', { type: 'small' })
       .select([
+        'message.id',
         'message.content',
         'message.visibleToAt',
         'message.visibleFromAt',
@@ -54,7 +56,7 @@ export class MessageRepository {
     newMessage.visibleToAt = config.visibleToAt
     newMessage.visibleFromAt = config.visibleFromAt
     newMessage.constantlyVisible = config.constantlyVisible
-    newMessage.category = config.category
+    newMessage.category = config.categoryList
     newMessage.link = config.link
     newMessage.user = config.user
 

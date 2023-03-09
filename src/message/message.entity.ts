@@ -1,9 +1,18 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator'
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne
+} from 'typeorm'
 
 import { CommonEntity } from 'src/common/entities/common.entity'
 import { LinkEntity } from 'src/link/link.entity'
-import { CategoryEntity } from './../category/cateogory.entity'
+import { CategoryEntity } from '../category/category.entity'
 import { UserEntity } from 'src/user/user.entity'
 
 @Entity('message')
@@ -36,7 +45,15 @@ export class MessageEntity extends CommonEntity {
   @JoinColumn({ name: 'user_id' })
   user: UserEntity
 
-  @OneToOne(() => CategoryEntity, (categoryEntity) => categoryEntity.message, { cascade: true })
-  @JoinColumn({ name: 'category_id' })
-  category: CategoryEntity
+  @ManyToMany(() => CategoryEntity, (categoryEntity) => categoryEntity.message, { cascade: true })
+  @JoinTable({
+    name: 'message_category',
+    joinColumn: {
+      name: 'message_id'
+    },
+    inverseJoinColumn: {
+      name: 'category_id'
+    }
+  })
+  category: CategoryEntity[]
 }

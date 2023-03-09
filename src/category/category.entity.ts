@@ -1,8 +1,14 @@
-import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, OneToOne } from 'typeorm'
-import { IsNotEmpty, IsString } from 'class-validator'
+import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, ManyToMany } from 'typeorm'
+import { IsNotEmpty, IsString, IsEnum } from 'class-validator'
 
 import { CommonEntity } from 'src/common/entities/common.entity'
 import { MessageEntity } from 'src/message/message.entity'
+
+export enum CategoryType {
+  'large' = 'large',
+  'medium' = 'medium',
+  'small' = 'small'
+}
 
 @Entity('category')
 @Tree('closure-table', {
@@ -15,6 +21,11 @@ export class CategoryEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   content: string
 
+  @IsEnum(CategoryType)
+  @IsNotEmpty()
+  @Column({ type: 'enum', enum: CategoryType, nullable: false })
+  type: CategoryType
+
   @TreeChildren()
   children: CategoryEntity[]
 
@@ -22,6 +33,6 @@ export class CategoryEntity extends CommonEntity {
   @JoinColumn({ name: 'parent_id' })
   parent: CategoryEntity
 
-  @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.category)
-  message: MessageEntity
+  @ManyToMany(() => MessageEntity, (messageEntity) => messageEntity.category)
+  message: MessageEntity[]
 }

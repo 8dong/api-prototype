@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 
-import { CategoryEntity } from './cateogory.entity'
+import { CategoryEntity } from './category.entity'
 import { TreeRepository } from 'typeorm'
 
 @Injectable()
@@ -10,27 +10,6 @@ export class CategoryRepository {
     @InjectRepository(CategoryEntity)
     private readonly categoryEntity: TreeRepository<CategoryEntity>
   ) {}
-
-  async findAllAncestorsByCategoryId(categoryId: number) {
-    let currentCategory = await this.categoryEntity.findOneBy({ id: categoryId })
-    let currentAncestorNum = await this.categoryEntity.countAncestors(currentCategory)
-
-    const result: CategoryEntity[] = []
-    result.unshift(currentCategory)
-
-    while (currentAncestorNum !== 0) {
-      const ancestorCategory = (await this.categoryEntity.findAncestors(currentCategory))[0]
-      const ancestorNum = await this.categoryEntity.countAncestors(ancestorCategory)
-
-      if (!ancestorCategory) break
-      result.unshift(ancestorCategory)
-
-      currentAncestorNum = ancestorNum
-      currentCategory = ancestorCategory
-    }
-
-    return result
-  }
 
   async findLargeCategoryByContent(content: string) {
     const largeCaegory = (await this.categoryEntity.findRoots()).find((category) => {
@@ -54,5 +33,16 @@ export class CategoryRepository {
     )
 
     return smallCategory
+  }
+
+  async findAllCategoryByMessageId(id: number) {
+    const categoryList = await this.categoryEntity
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.message', 'message')
+      .where('message.id = :id', { id })
+      .select('category')
+      .getRawMany()
+
+    return categoryList
   }
 }
