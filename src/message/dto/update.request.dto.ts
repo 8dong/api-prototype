@@ -1,12 +1,20 @@
-import { PickType } from '@nestjs/mapped-types'
+import { PartialType, PickType } from '@nestjs/mapped-types'
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsObject, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { IsObject, IsNotEmptyObject, IsArray } from 'class-validator'
 
-import { LinkEntity } from 'src/link/link.entity'
 import { MessageEntity } from '../message.entity'
+import { LinkEntity } from 'src/link/link.entity'
 import { CategoryEntity } from 'src/category/category.entity'
 
-class MessageConfigDto extends PickType(MessageEntity, [
+export class UpdateLinkRequestDto extends PickType(PartialType(LinkEntity), [
+  'uuid',
+  'href',
+  'type'
+]) {}
+
+export class UpdateCategoryRequestDto extends PickType(PartialType(CategoryEntity), ['uuid']) {}
+
+export class UpdateMessageRequestDto extends PickType(PartialType(MessageEntity), [
   'uuid',
   'content',
   'visibleToAt',
@@ -14,23 +22,19 @@ class MessageConfigDto extends PickType(MessageEntity, [
   'constantlyVisible'
 ]) {}
 
-class LinkConfigDto extends PickType(LinkEntity, ['uuid', 'href', 'type']) {}
-
-class CategoryConfig extends PickType(CategoryEntity, ['uuid']) {}
-
 export class UpdateRequestDto {
   @IsObject()
-  @IsNotEmptyObject()
-  @Type(() => MessageConfigDto)
-  messageConfig: MessageConfigDto
+  @Type(() => UpdateMessageRequestDto)
+  message?: UpdateMessageRequestDto
 
   @IsObject()
-  @IsNotEmptyObject()
-  @Type(() => LinkConfigDto)
-  linkConfig: LinkConfigDto
+  @Type(() => UpdateLinkRequestDto)
+  link?: UpdateLinkRequestDto
 
   @IsArray()
-  @IsNotEmptyObject()
-  @Type(() => CategoryConfig)
-  categoryConfigList: CategoryConfig[]
+  @ValidateNested({ each: true })
+  @ArrayMinSize(3)
+  @ArrayMaxSize(3)
+  @Type(() => UpdateLinkRequestDto)
+  category?: UpdateCategoryRequestDto[]
 }

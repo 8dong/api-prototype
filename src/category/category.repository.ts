@@ -1,3 +1,7 @@
+import {
+  UpdateCategoryRequestDto,
+  UpdateMessageRequestDto
+} from './../message/dto/update.request.dto'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 

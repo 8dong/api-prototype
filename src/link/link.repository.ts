@@ -5,6 +5,7 @@ import { v4 } from 'uuid'
 
 import { LinkType } from './link.entity'
 import { LinkEntity } from './link.entity'
+import { UpdateLinkRequestDto } from 'src/message/dto/update.request.dto'
 
 @Injectable()
 export class LinkRepository {
@@ -31,12 +32,7 @@ export class LinkRepository {
     await this.linkEntity.save(link)
   }
 
-  async updateLinkEntity(linkConfig) {
-    await this.linkEntity
-      .createQueryBuilder('link')
-      .where('link.uuid = :uuid', { uuid: linkConfig.uuid })
-      .update()
-      .set({ ...linkConfig })
-      .execute()
+  async update(linkConfig: UpdateLinkRequestDto) {
+    await this.linkEntity.update({ uuid: linkConfig.uuid }, { ...linkConfig })
   }
 }

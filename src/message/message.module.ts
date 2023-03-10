@@ -8,9 +8,16 @@ import { MessageEntity } from './message.entity'
 import { MessageContoller } from './message.controller'
 import { MessageService } from './message.service'
 import { MessageRepository } from './message.repository'
+import { MessageCategoryModule } from 'src/map/message-category/message-category.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MessageEntity]), UserModule, CategoryModule, LinkModule],
+  imports: [
+    TypeOrmModule.forFeature([MessageEntity]),
+    UserModule,
+    CategoryModule,
+    LinkModule,
+    MessageCategoryModule
+  ],
   controllers: [MessageContoller],
   providers: [MessageService, MessageRepository],
   exports: [MessageService, MessageRepository]

@@ -1,12 +1,18 @@
-import { CategoryEntity } from './../category/category.entity'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { CreateRequestDto } from './dto/create.request.dto'
 
-import { CreateRequestDto } from './../user/dto/createMessage.request.dto'
-import { UpdateRequestDto } from './dto/update.request.dto'
+import { Injectable } from '@nestjs/common'
+import {
+  UpdateCategoryRequestDto,
+  UpdateLinkRequestDto,
+  UpdateMessageRequestDto
+} from './dto/update.request.dto'
+import { CategoryEntity } from 'src/category/category.entity'
 import { UserRepository } from 'src/user/user.repository'
 import { CategoryRepository } from 'src/category/category.repository'
 import { MessageRepository } from './message.repository'
+import { MessageCategoryRepository } from 'src/map/message-category/message-category.repository'
 import { LinkRepository } from 'src/link/link.repository'
+import { MessageCategoryEntity } from 'src/map/message-category/message_category.entity'
 
 @Injectable()
 export class MessageService {
@@ -14,82 +20,111 @@ export class MessageService {
     private readonly messageRepository: MessageRepository,
     private readonly userRepository: UserRepository,
     private readonly categoryRepository: CategoryRepository,
-    private readonly linkRepository: LinkRepository
+    private readonly linkRepository: LinkRepository,
+    private readonly messageCategoryRepository: MessageCategoryRepository
   ) {}
 
-  async getMessagesByUserUniqueId(uuid: string) {
-    const userEntity = await this.userRepository.findOneByUserUniqueId(uuid)
-    const messageRawList = await this.messageRepository.getRawManyByUserId(userEntity.id)
-
-    for (const messageRaw of messageRawList) {
-      const categoryEntityList = await this.categoryRepository.getManyByMessageId(messageRaw.id)
-
-      const categoryContentList = categoryEntityList.map((categoryEntity) => ({
-        categoryType: categoryEntity.type,
-        categoryContent: categoryEntity.content
-      }))
-
-      messageRaw.category = categoryContentList
-
-      delete messageRaw.smallCategoryId
-      delete messageRaw.id
-    }
-
-    return messageRawList
-  }
-
   async createMessage(uuid: string, req: CreateRequestDto) {
-    const newLinkEntity = this.linkRepository.createLinkEntity(req.linkHref, req.linkType)
+    const linkEntity = this.linkRepository.createLinkEntity(req.link.href, req.link.type)
     const userEntity = await this.userRepository.findOneByUserUniqueId(uuid)
-
-    const largeCategoryEntity = await this.categoryRepository.findOneLargeCategoryEntityByContent(
-      req.categoryContent.largeCategory
-    )
-    const mediumCategoryEntity = await this.categoryRepository.findOneMediumCategoryEntityByContent(
-      largeCategoryEntity,
-      req.categoryContent.mediumCategory
-    )
-    const smallCategoryEntity = await this.categoryRepository.findOneSmallCategoryEntityByContent(
-      mediumCategoryEntity,
-      req.categoryContent.smallCategory
-    )
-    if (!largeCategoryEntity || !mediumCategoryEntity || !smallCategoryEntity) {
-      throw new BadRequestException('Check your request')
-    }
+    const messageCategoryEntityList: MessageCategoryEntity[] = []
 
     const messageConfig = {
       content: req.content,
       visibleToAt: req.visibleToAt,
       visibleFromAt: req.visibleFromAt,
       constantlyVisible: req.constantlyVisible,
-      categoryList: [largeCategoryEntity, mediumCategoryEntity, smallCategoryEntity],
-      link: newLinkEntity,
+      link: linkEntity,
       user: userEntity
     }
-    const newMessage = this.messageRepository.createMessageEntity(messageConfig)
 
-    await this.linkRepository.saveLinkEntity(newLinkEntity)
-    await this.messageRepository.saveMessageEntity(newMessage)
+    const messageEntity = this.messageRepository.createMessageEntity(messageConfig)
 
-    return newMessage
-  }
+    for (const categoryUniqueId of req.category) {
+      const categoryEntity = await this.categoryRepository.findOneByUniqueId(categoryUniqueId.uuid)
 
-  async updateMessageByUserUniqueId(uuid: string, req: UpdateRequestDto) {
-    const messageConfig = { ...req.messageConfig }
-    const linkConfig = { ...req.linkConfig }
+      const messageCategoryEntity = this.messageCategoryRepository.createMessageCategory(
+        categoryEntity,
+        messageEntity
+      )
 
-    const categoryEntityList = []
-
-    for (const categoryConfig of req.categoryConfigList) {
-      const categoryEntity = await this.categoryRepository.findOneByUniqueId(categoryConfig.uuid)
-      categoryEntityList.push(categoryEntity)
+      messageCategoryEntityList.push(messageCategoryEntity)
     }
 
-    await this.messageRepository.updateMessageEntity(messageConfig, categoryEntityList)
-    await this.linkRepository.updateLinkEntity(linkConfig)
+    messageEntity.messageCategory = messageCategoryEntityList
+
+    await this.linkRepository.saveLinkEntity(linkEntity)
+    await this.messageRepository.saveMessageEntity(messageEntity)
   }
+
+  async getMessagesByUserUniqueId(uuid: string) {
+    const result = []
+
+    const userEntity = await this.userRepository.findOneByUserUniqueId(uuid)
+    const messageEntityList = await this.messageRepository.getRawManyByUserId(userEntity.id)
+
+    for (const messageEntity of messageEntityList) {
+      const categoryResponse = []
+
+      for (const messageCategoryEntity of messageEntity.messageCategory) {
+        const categoryEntity = messageCategoryEntity.category
+        const categoryType = categoryEntity.type
+        const categoryContent = categoryEntity.content
+        const categoryUniqueId = categoryEntity.uuid
+
+        categoryResponse.push({
+          uuid: categoryUniqueId,
+          type: categoryType,
+          content: categoryContent
+        })
+      }
+
+      result.push({
+        uuid: messageEntity.uuid,
+        content: messageEntity.content,
+        visibleToAt: messageEntity.visibleToAt,
+        visibleFromAt: messageEntity.visibleFromAt,
+        constantlyVisible: messageEntity.constantlyVisible,
+        createAt: messageEntity.createAt,
+        link: {
+          uuid: messageEntity.link.uuid,
+          href: messageEntity.link.href,
+          type: messageEntity.link.type
+        },
+        category: [...categoryResponse]
+      })
+    }
+
+    return result
+  }
+
+  async updateMessage(
+    messageConfig: UpdateMessageRequestDto,
+    linkConfig: UpdateLinkRequestDto,
+    categoryConfigList: UpdateCategoryRequestDto[]
+  ) {
+    if (messageConfig) {
+      await this.messageRepository.update(messageConfig)
+    }
+
+    if (linkConfig) {
+      await this.linkRepository.update(linkConfig)
+    }
+
+    const categoryEntityList: CategoryEntity[] = []
+    if (categoryConfigList.length !== 0) {
+      for (const categoryConfig of categoryConfigList) {
+        const categoryEntity = await this.categoryRepository.findOneByUniqueId(categoryConfig.uuid)
+
+        categoryEntityList.push(categoryEntity)
+      }
+      const messageEntity = await this.messageRepository.findOneByUniqueId(messageConfig.uuid)
+
+      await this.messageCategoryRepository.update(categoryEntityList, messageEntity)
+    }
+  }
+
+  // insert into category (uuid, content, parent_id, type) values('1', '식사', null, 'large'), ('2', '고기', 1, 'medium'), ('3', '삼겹', 2, 'small'), ('4', '분식', 1, 'medium'), ('5', '만두', 4, 'small'), ('6','떡볶이', 4, 'small'), ('7', '교통/차량', null, 'large'), ('8', '대리운전', 7, 'medium'), ('9', '일반', 7, 'small');
+
+  // insert into category_closure (ancestor_id, descendant_id) values(1, 2), (2, 3), (1, 4), (4, 5), (4, 6), (7, 8), (7, 9)
 }
-
-// insert into category (uuid, content, parent_id, type) values('1', '식사', null, 'large'), ('2', '고기', 1, 'medium'), ('3', '삼겹', 2, 'small'), ('4', '분식', 1, 'medium'), ('5', '만두', 4, 'small'), ('6','떡볶이', 4, 'small'), ('7', '교통/차량', null, 'large'), ('8', '대리운전', 7, 'medium'), ('9', '일반', 7, 'small');
-
-// insert into category_closure (ancestor_id, descendant_id) values(1, 2), (2, 3), (1, 4), (4, 5), (4, 6), (7, 8), (7, 9);

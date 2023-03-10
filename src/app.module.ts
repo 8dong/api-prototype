@@ -10,6 +10,7 @@ import { LinkEntity } from './link/link.entity'
 import { MessageEntity } from './message/message.entity'
 import { CategoryEntity } from './category/category.entity'
 import { UserEntity } from './user/user.entity'
+import { MessageCategoryEntity } from './map/message-category/message_category.entity'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,7 +23,7 @@ import { UserEntity } from './user/user.entity'
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [UserEntity, LinkEntity, CategoryEntity, MessageEntity],
+      entities: [UserEntity, LinkEntity, CategoryEntity, MessageEntity, MessageCategoryEntity],
       synchronize: true
     }),
     UserModule,

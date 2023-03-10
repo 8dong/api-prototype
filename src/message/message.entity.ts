@@ -4,16 +4,15 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne
 } from 'typeorm'
 
 import { CommonEntity } from 'src/common/entities/common.entity'
 import { LinkEntity } from 'src/link/link.entity'
-import { CategoryEntity } from '../category/category.entity'
 import { UserEntity } from 'src/user/user.entity'
+import { MessageCategoryEntity } from 'src/map/message-category/message_category.entity'
 
 @Entity('message')
 export class MessageEntity extends CommonEntity {
@@ -37,23 +36,16 @@ export class MessageEntity extends CommonEntity {
   @CreateDateColumn({ name: 'created_at' })
   createAt: Date
 
-  @OneToOne(() => LinkEntity, (linkEntity) => linkEntity.message, { cascade: true })
+  @OneToOne(() => LinkEntity, (link) => link.message, { cascade: true })
   @JoinColumn({ name: 'link_id' })
   link: LinkEntity
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.message, { cascade: true })
+  @ManyToOne(() => UserEntity, (user) => user.message, { cascade: true })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity
 
-  @ManyToMany(() => CategoryEntity, (categoryEntity) => categoryEntity.message, { cascade: true })
-  @JoinTable({
-    name: 'message_category',
-    joinColumn: {
-      name: 'message_id'
-    },
-    inverseJoinColumn: {
-      name: 'category_id'
-    }
+  @OneToMany(() => MessageCategoryEntity, (messageCategory) => messageCategory.message, {
+    cascade: true
   })
-  category: CategoryEntity[]
+  messageCategory: MessageCategoryEntity[]
 }

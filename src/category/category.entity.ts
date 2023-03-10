@@ -1,8 +1,8 @@
-import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, ManyToMany } from 'typeorm'
+import { Column, Entity, Tree, TreeChildren, TreeParent, JoinColumn, OneToMany } from 'typeorm'
 import { IsNotEmpty, IsString, IsEnum } from 'class-validator'
 
 import { CommonEntity } from 'src/common/entities/common.entity'
-import { MessageEntity } from 'src/message/message.entity'
+import { MessageCategoryEntity } from 'src/map/message-category/message_category.entity'
 
 export enum CategoryType {
   'large' = 'large',
@@ -33,6 +33,8 @@ export class CategoryEntity extends CommonEntity {
   @JoinColumn({ name: 'parent_id' })
   parent: CategoryEntity
 
-  @ManyToMany(() => MessageEntity, (messageEntity) => messageEntity.category)
-  message: MessageEntity[]
+  @OneToMany(() => MessageCategoryEntity, (messagCategoryEntity) => messagCategoryEntity.category, {
+    cascade: true
+  })
+  categoryMessage: MessageCategoryEntity[]
 }

@@ -29,6 +29,6 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'enum', enum: RoleType, nullable: false })
   role: RoleType
 
-  @OneToMany(() => MessageEntity, (messageEntity) => messageEntity.user)
+  @OneToMany(() => MessageEntity, (message) => message.user)
   message: MessageEntity[]
 }

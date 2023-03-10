@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Req,
-  Body,
-  UseGuards,
-  BadRequestException
-} from '@nestjs/common'
+import { Controller, Get, Post, Put, Req, Body, UseGuards } from '@nestjs/common'
 
 import { CreateRequestDto } from './dto/create.request.dto'
 import { UpdateRequestDto } from './dto/update.request.dto'
@@ -19,6 +10,13 @@ import { MessageService } from 'src/message/message.service'
 export class MessageContoller {
   constructor(private readonly messageService: MessageService) {}
 
+  @Post()
+  async createMessage(@Req() req, @Body() body: CreateRequestDto) {
+    const userUniqueId = req.user.uuid
+
+    await this.messageService.createMessage(userUniqueId, body)
+  }
+
   @Get()
   async getMessages(@Req() req) {
     const userUniqueId = req.user.id
@@ -28,35 +26,12 @@ export class MessageContoller {
     return { messages }
   }
 
-  @Post()
-  async createMessage(@Req() req, @Body() body: CreateRequestDto) {
-    this.isValidDuration(body.constantlyVisible, body.visibleToAt, body.visibleFromAt)
-
-    const userUniqueId = req.user.uuid
-
-    await this.messageService.createMessage(userUniqueId, body)
-  }
-
-  isValidDuration(constantlyVisible: boolean, visibleToAt: Date, visibleFromAt: Date) {
-    if (!constantlyVisible && (!visibleToAt || !visibleFromAt)) {
-      throw new BadRequestException('Check your request')
-    } else if (constantlyVisible && (visibleToAt || visibleFromAt)) {
-      throw new BadRequestException('Check your request')
-    }
-
-    return true
-  }
-
   @Put()
   async updateMessage(@Req() req, @Body() body: UpdateRequestDto) {
-    this.isValidDuration(
-      body.messageConfig.constantlyVisible,
-      body.messageConfig.visibleToAt,
-      body.messageConfig.visibleFromAt
-    )
+    const messageConfig = { ...body.message }
+    const linkConfig = { ...body.link }
+    const categoryConfigList = [...body.category]
 
-    const userUniqueId = req.user.uuid
-
-    await this.messageService.updateMessageByUserUniqueId(userUniqueId, body)
+    await this.messageService.updateMessage(messageConfig, linkConfig, categoryConfigList)
   }
 }
