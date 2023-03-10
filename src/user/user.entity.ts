@@ -29,6 +29,8 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'enum', enum: RoleType, nullable: false })
   role: RoleType
 
-  @OneToMany(() => MessageEntity, (message) => message.user)
+  @OneToMany(() => MessageEntity, (message) => message.user, {
+    cascade: ['insert', 'update', 'remove']
+  })
   message: MessageEntity[]
 }

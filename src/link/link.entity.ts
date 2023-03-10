@@ -21,6 +21,6 @@ export class LinkEntity extends CommonEntity {
   @Column({ type: 'enum', enum: LinkType, nullable: false })
   type: LinkType
 
-  @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.link)
+  @OneToOne(() => MessageEntity, (messageEntity) => messageEntity.link, { onDelete: 'CASCADE' })
   message: MessageEntity
 }

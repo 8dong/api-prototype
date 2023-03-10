@@ -35,4 +35,8 @@ export class LinkRepository {
   async update(linkConfig: UpdateLinkRequestDto) {
     await this.linkEntity.update({ uuid: linkConfig.uuid }, { ...linkConfig })
   }
+
+  async deleteLinkByUniqueId(uuid: string) {
+    await this.linkEntity.delete({ uuid })
+  }
 }

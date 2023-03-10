@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Req, Body, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Put, Req, Body, UseGuards, Delete } from '@nestjs/common'
 
 import { CreateRequestDto } from './dto/create.request.dto'
 import { UpdateRequestDto } from './dto/update.request.dto'
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard'
 import { MessageService } from 'src/message/message.service'
+import { DeleteRequestDto } from './dto/delete.request.dto'
 
 @Controller('/message')
 @UseGuards(JwtAuthGuard)
@@ -27,11 +28,16 @@ export class MessageContoller {
   }
 
   @Put()
-  async updateMessage(@Req() req, @Body() body: UpdateRequestDto) {
-    const messageConfig = { ...body.message }
-    const linkConfig = { ...body.link }
-    const categoryConfigList = [...body.category]
+  async updateMessage(@Body() body: UpdateRequestDto) {
+    const messageConfig = body.message && { ...body.message }
+    const linkConfig = body.link && { ...body.link }
+    const categoryConfigList = body.category && [...body.category]
 
     await this.messageService.updateMessage(messageConfig, linkConfig, categoryConfigList)
+  }
+
+  @Delete()
+  async deleteMessage(@Body() body: DeleteRequestDto) {
+    await this.messageService.deleteMessage(body.uuid)
   }
 }

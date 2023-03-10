@@ -36,16 +36,16 @@ export class MessageEntity extends CommonEntity {
   @CreateDateColumn({ name: 'created_at' })
   createAt: Date
 
-  @OneToOne(() => LinkEntity, (link) => link.message, { cascade: true })
+  @OneToOne(() => LinkEntity, (link) => link.message, { cascade: ['insert', 'update', 'remove'] })
   @JoinColumn({ name: 'link_id' })
   link: LinkEntity
 
-  @ManyToOne(() => UserEntity, (user) => user.message, { cascade: true })
+  @ManyToOne(() => UserEntity, (user) => user.message, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity
 
   @OneToMany(() => MessageCategoryEntity, (messageCategory) => messageCategory.message, {
-    cascade: true
+    cascade: ['insert', 'update', 'remove']
   })
   messageCategory: MessageCategoryEntity[]
 }

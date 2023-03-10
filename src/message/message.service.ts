@@ -111,17 +111,30 @@ export class MessageService {
       await this.linkRepository.update(linkConfig)
     }
 
-    const categoryEntityList: CategoryEntity[] = []
-    if (categoryConfigList.length !== 0) {
-      for (const categoryConfig of categoryConfigList) {
-        const categoryEntity = await this.categoryRepository.findOneByUniqueId(categoryConfig.uuid)
+    if (categoryConfigList) {
+      const categoryEntityList: CategoryEntity[] = []
+      if (categoryConfigList.length !== 0) {
+        for (const categoryConfig of categoryConfigList) {
+          const categoryEntity = await this.categoryRepository.findOneByUniqueId(
+            categoryConfig.uuid
+          )
 
-        categoryEntityList.push(categoryEntity)
+          categoryEntityList.push(categoryEntity)
+        }
+        const messageEntity = await this.messageRepository.findOneByUniqueId(messageConfig.uuid)
+
+        await this.messageCategoryRepository.update(categoryEntityList, messageEntity)
       }
-      const messageEntity = await this.messageRepository.findOneByUniqueId(messageConfig.uuid)
-
-      await this.messageCategoryRepository.update(categoryEntityList, messageEntity)
     }
+  }
+
+  async deleteMessage(uuid: string) {
+    const messageEntity = await this.messageRepository.findOneByUniqueId(uuid)
+
+    const linkEntity = await this.linkRepository.findOneByUUID(messageEntity.link.uuid)
+
+    await this.messageRepository.deleteMessageByUniqueId(uuid)
+    await this.linkRepository.deleteLinkByUniqueId(linkEntity.uuid)
   }
 
   // insert into category (uuid, content, parent_id, type) values('1', '식사', null, 'large'), ('2', '고기', 1, 'medium'), ('3', '삼겹', 2, 'small'), ('4', '분식', 1, 'medium'), ('5', '만두', 4, 'small'), ('6','떡볶이', 4, 'small'), ('7', '교통/차량', null, 'large'), ('8', '대리운전', 7, 'medium'), ('9', '일반', 7, 'small');

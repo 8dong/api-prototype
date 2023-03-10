@@ -8,11 +8,15 @@ export class MessageCategoryEntity {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => MessageEntity, (messageEntity) => messageEntity.messageCategory)
+  @ManyToOne(() => MessageEntity, (messageEntity) => messageEntity.messageCategory, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'message_id' })
   message: MessageEntity
 
-  @ManyToOne(() => CategoryEntity, (categoryEntity) => categoryEntity.categoryMessage)
+  @ManyToOne(() => CategoryEntity, (categoryEntity) => categoryEntity.categoryMessage, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity
 }

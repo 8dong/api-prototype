@@ -70,8 +70,12 @@ export class MessageRepository {
   }
 
   async findOneByUniqueId(uuid: string) {
-    const message = await this.messageEntity.findOneBy({ uuid })
+    const message = await this.messageEntity.findOne({ relations: ['link'], where: { uuid } })
 
     return message
+  }
+
+  async deleteMessageByUniqueId(uuid: string) {
+    await this.messageEntity.delete({ uuid })
   }
 }
